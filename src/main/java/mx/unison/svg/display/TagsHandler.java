@@ -102,12 +102,23 @@ public class TagsHandler  extends DefaultHandler {
     }
 
     private void copyAttributes(Attributes atts, Properties myShape) {
-        if(atts.getLength() != 0) {
+        if(atts.getLength() != 0) { // si da problemas lo comentarlo en caso de que me de problemas
             for(int i = 0; i < atts.getLength(); i++) {
                 String name = atts.getLocalName(i);
+
+                // Si SAX no proporciona el nombre local, usar qName.
+                if (name == null || name.isEmpty()) {
+                    name = atts.getQName(i);
+                }
+
                 String value = atts.getValue(i);
-                myShape.put(name, value);
+
+                if (name != null && !name.isEmpty() && value != null) {
+                    myShape.setProperty(name, value);
+                }
             }
+
+
         }
     }
 
