@@ -203,6 +203,58 @@ public class SVGDiagram extends JComponent {
                             radius * 2, radius * 2);
 
                 }
+
+                if (type.equals("rect")) {
+                    try {
+                        double x = Double.parseDouble(
+                                shape.getProperty("x", "0"));
+                        double y = Double.parseDouble(
+                                shape.getProperty("y", "0"));
+                        double width = Double.parseDouble(
+                                shape.getProperty("width", "0"));
+                        double height = Double.parseDouble(
+                                shape.getProperty("height", "0"));
+
+                        if (width <= 0 || height <= 0) {
+                            continue;
+                        }
+
+                        float strokeWidth = Float.parseFloat(
+                                shape.getProperty("stroke-width", "1"));
+
+                        String fill = shape.getProperty("fill", "black");
+                        String stroke = shape.getProperty("stroke", "none");
+
+                        java.awt.geom.Rectangle2D.Double rect =
+                                new java.awt.geom.Rectangle2D.Double(
+                                        x, y, width, height);
+
+                        // Dibujar el relleno.
+                        if (!fill.equalsIgnoreCase("none")) {
+                            Color fillColor = parseColor(fill, 1.0f);
+                            if (fillColor != null) {
+                                g2d.setColor(fillColor);
+                                g2d.fill(rect);
+                            }
+                        }
+
+                        // Dibujar el contorno.
+                        if (!stroke.equalsIgnoreCase("none")
+                                && strokeWidth > 0) {
+                            Color strokeColor = parseColor(stroke, 1.0f);
+                            if (strokeColor != null) {
+                                g2d.setColor(strokeColor);
+                                g2d.setStroke(
+                                        new BasicStroke(strokeWidth));
+                                g2d.draw(rect);
+                            }
+                        }
+                    } catch (NumberFormatException ex) {
+                        LOG.warning("Atributos numéricos inválidos en rect: "
+                                + ex.getMessage());
+                    }
+                }
+
             }
 
         }
