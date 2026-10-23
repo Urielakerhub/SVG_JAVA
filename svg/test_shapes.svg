@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="500">
+    <!-- Línea original para verificar que sigue operando -->
+    <line x1="10" y1="10" x2="590" y2="10" stroke="gray" stroke-width="2" />
+
+    <!-- Dos polilíneas con diferentes cantidades de vértices -->
+    <polyline points="30,50 80,100 130,50 180,100" fill="none" stroke="blue" stroke-width="3" />
+    <polyline points="220,50 250,90 280,60 310,100 340,40" fill="yellow" stroke="red" stroke-width="2" />
+
+    <!-- Dos rectángulos con distintos tamaños y colores -->
+    <rect x="30" y="140" width="120" height="80" fill="green" stroke="black" stroke-width="2" />
+    <rect x="180" y="140" width="140" height="80" rx="15" ry="15" fill="orange" stroke="blue" stroke-width="3" />
+
+    <!-- Dos elipses con diferentes radios -->
+    <ellipse cx="420" cy="90" rx="60" ry="30" fill="lightblue" stroke="navy" stroke-width="2" />
+    <ellipse cx="420" cy="190" rx="40" ry="70" fill="pink" stroke="magenta" stroke-width="3" />
+
+    <!-- Dos elementos de texto con diferentes tamaños y colores -->
+    <text x="30" y="280" font-family="Arial" font-size="24" fill="black">Demostración SVG Java 2D</text>
+    <text x="30" y="320" font-family="Verdana" font-size="18" fill="purple">Práctica </text>
+</svg>
