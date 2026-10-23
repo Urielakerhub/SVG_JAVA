@@ -16,8 +16,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Logger;
+import java.awt.geom.Ellipse2D;
+import java.awt.Font;
+import java.awt.BasicStroke;
 
 public class SVGDiagram extends JComponent {
+
 
     public static final Logger LOG = Logger.getLogger(SVGDiagram.class.getName());
 
@@ -97,11 +101,13 @@ public class SVGDiagram extends JComponent {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         LOG.info("Painting SVG Diagram");
+
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(strokeColor);
 
         for (Properties shape : shapes) {
             String type = shape.getProperty("type");
+
 
             if (type == null)
                 continue;
@@ -139,7 +145,7 @@ public class SVGDiagram extends JComponent {
                         } catch (NumberFormatException e) {
                             LOG.warning("Invalid stroke color: " + stroke);
                             //strokeColor = parseColor(stroke);
-                            g2d.setColor( parseColor(stroke, 1.0f) );
+                            g2d.setColor(parseColor(stroke, 1.0f));
                         }
                         g2d.setColor(strokeColor);
                     } else {
@@ -147,7 +153,6 @@ public class SVGDiagram extends JComponent {
                     }
                     g2d.drawLine(x1, y1, x2, y2);
                 }
-
             }
             if (type.equals("circle")) {
                 String cx = shape.getProperty("cx");
@@ -167,7 +172,7 @@ public class SVGDiagram extends JComponent {
                             fillColor = Color.decode(fill);
                         } catch (NumberFormatException e) {
                             LOG.warning("Invalid stroke color: " + fill);
-                            fillColor = parseColor(fill,1.0f);
+                            fillColor = parseColor(fill, 1.0f);
                         }
                         g2d.setColor(fillColor);
                         g2d.fillOval(centroX - radius, centroY - radius
@@ -203,6 +208,74 @@ public class SVGDiagram extends JComponent {
                             radius * 2, radius * 2);
 
                 }
+            }
+
+                if (type.equals("ellipse")) {
+                    try {
+                        double ellipseCx = Double.parseDouble(shape.getProperty("cx", "0"));
+                        double ellipseCy = Double.parseDouble(shape.getProperty("cy", "0"));
+                        double rx = Double.parseDouble(shape.getProperty("rx", "0"));
+                        double ry = Double.parseDouble(shape.getProperty("ry", "0"));
+
+                        String ellipseFill = shape.getProperty("fill", "black");
+                        String ellipseStroke = shape.getProperty("stroke", "none");
+                        float ellipseStrokeWidth = Float.parseFloat(
+                                shape.getProperty("stroke-width", "1"));
+
+                        Ellipse2D.Double ellipse = new Ellipse2D.Double(
+                                ellipseCx - rx,
+                                ellipseCy - ry,
+                                rx * 2,
+                                ry * 2
+                        );
+
+                        if (!ellipseFill.equalsIgnoreCase("none")) {
+                            Color c = parseColor(ellipseFill);
+                            if (c != null) {
+                                g2d.setColor(c);
+                                g2d.fill(ellipse);
+
+                            }
+                        }
+
+                        if (!ellipseStroke.equalsIgnoreCase("none")
+                                && ellipseStrokeWidth > 0) {
+                            Color c = parseColor(ellipseStroke);
+                            if (c != null) {
+                                g2d.setColor(c);
+                                g2d.setStroke(new BasicStroke(ellipseStrokeWidth));
+                                g2d.draw(ellipse);
+                            }
+                        }
+
+                    } catch (NumberFormatException ex) {
+                        LOG.warning("Invalid ellipse attributes: " + ex.getMessage());
+                    }
+                    }
+
+                    if (type.equals("text")) {
+                        try {
+                            double textX = Double.parseDouble(shape.getProperty("x", "0"));
+                            double textY = Double.parseDouble(shape.getProperty("y", "0"));
+
+                            String content = shape.getProperty("content", "");
+                            String textFill = shape.getProperty("fill", "black");
+                            int fontSize = Integer.parseInt(
+                                    shape.getProperty("font-size", "16"));
+
+                            Color c = parseColor(textFill);
+
+                            if (c != null) {
+                                g2d.setColor(c);
+                                g2d.setFont(new Font("Arial", Font.PLAIN, fontSize));
+                                g2d.drawString(content, (float) textX, (float) textY);
+
+                            }
+
+                        } catch (NumberFormatException ex) {
+                            LOG.warning("Invalid text attributes: " + ex.getMessage());
+                        }
+                    }
 
                 if (type.equals("rect")) {
                     try {
@@ -255,12 +328,9 @@ public class SVGDiagram extends JComponent {
                     }
                 }
 
-
             }
 
         }
-
-    }
 
     // https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/named-color
     private void loadColors() {

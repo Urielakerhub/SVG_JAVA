@@ -18,7 +18,6 @@ public class DisplayDiagram {
         path = path.toAbsolutePath();
         System.out.println(path.toString());
 
-
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -30,7 +29,7 @@ public class DisplayDiagram {
                 frame.setResizable(false);
                 frame.pack();
             }
-        });
-
+        }
+        );
     }
 }

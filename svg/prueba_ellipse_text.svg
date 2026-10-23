@@ -1,0 +1,8 @@
+
+<svg width="391" height="391" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="120" cy="100" rx="80" ry="40"
+             fill="yellow" stroke="blue" stroke-width="3"/>
+    <text x="40" y="200" fill="black" font-size="24">
+        Hola, mi loco
+    </text>
+</svg>

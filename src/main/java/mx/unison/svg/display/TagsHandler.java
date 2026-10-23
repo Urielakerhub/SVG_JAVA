@@ -79,22 +79,20 @@ public class TagsHandler  extends DefaultHandler {
             copyAttributes(atts, currentShape);
             shapes.add(currentShape);
         }
+        if (tagName.equals("ellipse")) {
+            LOG.info("Starting element " + tagName);
+            currentShape = new Properties();
+            currentShape.put("type", "ellipse");
+
+            copyAttributes(atts, currentShape);
+            shapes.add(currentShape);
+        }
 
         if (tagName.equals("rect")) {
             LOG.info("Starting element " + tagName);
 
             currentShape = new Properties();
             currentShape.setProperty("type", "rect");
-
-            copyAttributes(atts, currentShape);
-            shapes.add(currentShape);
-        }
-
-        if (tagName.equals("ellipse")) {
-            LOG.info("Starting element " + tagName);
-
-            currentShape = new Properties();
-            currentShape.setProperty("type", "ellipse");
 
             copyAttributes(atts, currentShape);
             shapes.add(currentShape);
