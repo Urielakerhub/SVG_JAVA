@@ -222,16 +222,16 @@ public class SVGDiagram extends JComponent {
                         float strokeWidth = Float.parseFloat(
                                 shape.getProperty("stroke-width", "1"));
 
-                        String fill = shape.getProperty("fill", "black");
-                        String stroke = shape.getProperty("stroke", "none");
+                        String rectFill = shape.getProperty("fill", "black");
+                        String rectStroke = shape.getProperty("stroke", "none");
 
                         java.awt.geom.Rectangle2D.Double rect =
                                 new java.awt.geom.Rectangle2D.Double(
                                         x, y, width, height);
 
                         // Dibujar el relleno.
-                        if (!fill.equalsIgnoreCase("none")) {
-                            Color fillColor = parseColor(fill, 1.0f);
+                        if (!rectFill.equalsIgnoreCase("none")) {
+                            Color fillColor = parseColor(rectFill, 1.0f);
                             if (fillColor != null) {
                                 g2d.setColor(fillColor);
                                 g2d.fill(rect);
@@ -239,9 +239,9 @@ public class SVGDiagram extends JComponent {
                         }
 
                         // Dibujar el contorno.
-                        if (!stroke.equalsIgnoreCase("none")
+                        if (!rectStroke.equalsIgnoreCase("none")
                                 && strokeWidth > 0) {
-                            Color strokeColor = parseColor(stroke, 1.0f);
+                            Color strokeColor = parseColor(rectStroke, 1.0f);
                             if (strokeColor != null) {
                                 g2d.setColor(strokeColor);
                                 g2d.setStroke(

@@ -16,6 +16,7 @@ public class TagsHandler  extends DefaultHandler {
 
     private ArrayList<Properties> shapes;
     private Properties currentShape = null;
+    private StringBuilder currentText = null;
 
     public TagsHandler() {
         super();
@@ -89,6 +90,28 @@ public class TagsHandler  extends DefaultHandler {
             shapes.add(currentShape);
         }
 
+        if (tagName.equals("ellipse")) {
+            LOG.info("Starting element " + tagName);
+
+            currentShape = new Properties();
+            currentShape.setProperty("type", "ellipse");
+
+            copyAttributes(atts, currentShape);
+            shapes.add(currentShape);
+        }
+
+        if (tagName.equals("text")) {
+            LOG.info("Starting element " + tagName);
+
+            currentShape = new Properties();
+            currentShape.setProperty("type", "text");
+
+            copyAttributes(atts, currentShape);
+            shapes.add(currentShape);
+
+            currentText = new StringBuilder();
+        }
+
         if (tagName.equals("polyline")) {
             LOG.info("Starting element " + tagName);
 
@@ -122,14 +145,36 @@ public class TagsHandler  extends DefaultHandler {
         }
     }
 
-    @Override
-    public void endElement(String uri, String localName, String qName) throws SAXException {
-        currentShape = null;
-    }
 
+    @Override
+    public void endElement(String uri, String localName, String qName)
+            throws SAXException {
+        String tagName = (localName == null || localName.isEmpty())
+                ? qName.toLowerCase()
+                : localName.toLowerCase();
+
+        if ("text".equals(tagName) && currentShape != null
+                && "text".equals(currentShape.getProperty("type"))) {
+            currentShape.setProperty("content", currentText.toString().trim());
+            currentText = null;
+        }
+
+        if ("line".equals(tagName)
+                || "circle".equals(tagName)
+                || "rect".equals(tagName)
+                || "polyline".equals(tagName)
+                || "ellipse".equals(tagName)
+                || "text".equals(tagName)) {
+            currentShape = null;
+        }
+    }
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
-
+        if (currentShape != null
+                && "text".equals(currentShape.getProperty("type"))
+                && currentText != null) {
+            currentText.append(ch, start, length);
+        }
     }
 
     @Override
