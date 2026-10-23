@@ -10,8 +10,17 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.xml.sax.Attributes;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
 
-public class TagsHandler  extends DefaultHandler {
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+public class TagsHandler extends DefaultHandler {
     public static final Logger LOG = Logger.getLogger( TagsHandler.class.getName() );
 
     private ArrayList<Properties> shapes;

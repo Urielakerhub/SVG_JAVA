@@ -16,6 +16,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Logger;
+import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Properties;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Properties;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 public class SVGDiagram extends JComponent {
 
@@ -95,172 +113,215 @@ public class SVGDiagram extends JComponent {
 
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        LOG.info("Painting SVG Diagram");
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.setColor(strokeColor);
+            super.paintComponent(g);
 
-        for (Properties shape : shapes) {
-            String type = shape.getProperty("type");
+            Graphics2D g2d = (Graphics2D) g.create();
 
-            if (type == null)
-                continue;
-            if (type.equals("line")) {
-                String x1Str = shape.getProperty("x1");
-                String y1Str = shape.getProperty("y1");
-                String x2Str = shape.getProperty("x2");
-                String y2Str = shape.getProperty("y2");
-                String stroke = shape.getProperty("stroke");
-                String strokeWidthStr = shape.getProperty("stroke-width");
+            try {
+                g2d.setRenderingHint(
+                        RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON
+                );
 
-                if (strokeWidthStr != null) {
-                    try {
-                        float strokeWidth = Float.parseFloat(strokeWidthStr);
-                        currentStroke = new BasicStroke(strokeWidth);
-                        g2d.setStroke(currentStroke);
-                    } catch (NumberFormatException e) {
-                        LOG.warning("Invalid stroke width: " + strokeWidthStr);
-                        currentStroke = new BasicStroke(1.0f);
-                        g2d.setStroke(currentStroke);
-                    }
-                }
+                for (Properties shape : shapes) {
+                    String type = shape.getProperty("type", "");
 
-                if (x1Str != null && y1Str != null && x2Str != null && y2Str != null) {
-                    int x1 = Integer.parseInt(x1Str);
-                    int y1 = Integer.parseInt(y1Str);
-                    int x2 = Integer.parseInt(x2Str);
-                    int y2 = Integer.parseInt(y2Str);
+                    // Dibujar LINE
+                    if (type.equals("line")) {
+                        double x1 = Double.parseDouble(shape.getProperty("x1", "0"));
+                        double y1 = Double.parseDouble(shape.getProperty("y1", "0"));
+                        double x2 = Double.parseDouble(shape.getProperty("x2", "0"));
+                        double y2 = Double.parseDouble(shape.getProperty("y2", "0"));
 
-                    if (stroke != null) {
-                        strokeColor = null;
+                        String stroke = shape.getProperty("stroke", "black");
+                        float strokeWidth = Float.parseFloat(
+                                shape.getProperty("stroke-width", "1")
+                        );
 
-                        try {
-                            strokeColor = Color.decode(stroke);
-                        } catch (NumberFormatException e) {
-                            LOG.warning("Invalid stroke color: " + stroke);
-                            //strokeColor = parseColor(stroke);
-                            g2d.setColor( parseColor(stroke, 1.0f) );
-                        }
-                        g2d.setColor(strokeColor);
-                    } else {
-                        g2d.setColor(strokeColor);
-                    }
-                    g2d.drawLine(x1, y1, x2, y2);
-                }
+                        if (!stroke.equals("none") && strokeWidth > 0) {
+                            Color color = getSafeColor(stroke);
 
-            }
-            if (type.equals("circle")) {
-                String cx = shape.getProperty("cx");
-                String cy = shape.getProperty("cy");
-                String radio = shape.getProperty("r");
-                String fill = shape.getProperty("fill");
-                String stroke = shape.getProperty("stroke");
-                String strokeWidthStr = shape.getProperty("stroke-width");
-
-                if (cx != null && cy != null && radio != null) {
-                    int centroX = Integer.parseInt(cx);
-                    int centroY = Integer.parseInt(cy);
-                    int radius = Integer.parseInt(radio);
-
-                    if (fill != null) {
-                        try {
-                            fillColor = Color.decode(fill);
-                        } catch (NumberFormatException e) {
-                            LOG.warning("Invalid stroke color: " + fill);
-                            fillColor = parseColor(fill,1.0f);
-                        }
-                        g2d.setColor(fillColor);
-                        g2d.fillOval(centroX - radius, centroY - radius
-                                , radius * 2, radius * 2);
-                    }
-                    if (stroke != null) {
-                        strokeColor = null;
-
-                        try {
-                            strokeColor = Color.decode(stroke);
-                        } catch (NumberFormatException e) {
-                            LOG.warning("Invalid stroke color: " + stroke);
-                            strokeColor = parseColor(stroke);
-                        }
-                        g2d.setColor(strokeColor);
-                    } else {
-                        g2d.setColor(fillColor);
-                    }
-
-                    if (strokeWidthStr != null) {
-                        try {
-                            float strokeWidth = Float.parseFloat(strokeWidthStr);
-                            currentStroke = new BasicStroke(strokeWidth);
-                            g2d.setStroke(currentStroke);
-                        } catch (NumberFormatException e) {
-                            LOG.warning("Invalid stroke width: " + strokeWidthStr);
-                            currentStroke = new BasicStroke(1.0f);
-                            g2d.setStroke(currentStroke);
+                            if (color != null) {
+                                g2d.setColor(color);
+                                g2d.setStroke(new BasicStroke(strokeWidth));
+                                g2d.draw(new java.awt.geom.Line2D.Double(
+                                        x1, y1, x2, y2
+                                ));
+                            }
                         }
                     }
-                    g2d.drawOval(centroX - radius,
-                            centroY - radius,
-                            radius * 2, radius * 2);
 
-                }
+                    // Dibujar CIRCLE
+                    else if (type.equals("circle")) {
+                        double cx = Double.parseDouble(shape.getProperty("cx", "0"));
+                        double cy = Double.parseDouble(shape.getProperty("cy", "0"));
+                        double r = Double.parseDouble(shape.getProperty("r", "0"));
 
-                if (type.equals("rect")) {
-                    try {
-                        double x = Double.parseDouble(
-                                shape.getProperty("x", "0"));
-                        double y = Double.parseDouble(
-                                shape.getProperty("y", "0"));
+                        if (r <= 0) {
+                            continue;
+                        }
+
+                        java.awt.geom.Ellipse2D.Double circle =
+                                new java.awt.geom.Ellipse2D.Double(
+                                        cx - r, cy - r, r * 2, r * 2
+                                );
+
+                        String fill = shape.getProperty("fill", "black");
+                        String stroke = shape.getProperty("stroke", "none");
+                        float strokeWidth = Float.parseFloat(
+                                shape.getProperty("stroke-width", "1")
+                        );
+
+                        if (!fill.equals("none")) {
+                            Color color = getSafeColor(fill);
+
+                            if (color != null) {
+                                g2d.setColor(color);
+                                g2d.fill(circle);
+                            }
+                        }
+
+                        if (!stroke.equals("none") && strokeWidth > 0) {
+                            Color color = getSafeColor(stroke);
+
+                            if (color != null) {
+                                g2d.setColor(color);
+                                g2d.setStroke(new BasicStroke(strokeWidth));
+                                g2d.draw(circle);
+                            }
+                        }
+                    }
+
+                    // Dibujar RECT
+                    else if (type.equals("rect")) {
+                        double x = Double.parseDouble(shape.getProperty("x", "0"));
+                        double y = Double.parseDouble(shape.getProperty("y", "0"));
                         double width = Double.parseDouble(
-                                shape.getProperty("width", "0"));
+                                shape.getProperty("width", "0")
+                        );
                         double height = Double.parseDouble(
-                                shape.getProperty("height", "0"));
+                                shape.getProperty("height", "0")
+                        );
 
                         if (width <= 0 || height <= 0) {
                             continue;
                         }
 
-                        float strokeWidth = Float.parseFloat(
-                                shape.getProperty("stroke-width", "1"));
-
-                        String rectFill = shape.getProperty("fill", "black");
-                        String rectStroke = shape.getProperty("stroke", "none");
-
                         java.awt.geom.Rectangle2D.Double rect =
                                 new java.awt.geom.Rectangle2D.Double(
-                                        x, y, width, height);
+                                        x, y, width, height
+                                );
 
-                        // Dibujar el relleno.
-                        if (!rectFill.equalsIgnoreCase("none")) {
-                            Color fillColor = parseColor(rectFill, 1.0f);
-                            if (fillColor != null) {
-                                g2d.setColor(fillColor);
+                        String fill = shape.getProperty("fill", "black");
+                        String stroke = shape.getProperty("stroke", "none");
+                        float strokeWidth = Float.parseFloat(
+                                shape.getProperty("stroke-width", "1")
+                        );
+
+                        if (!fill.equals("none")) {
+                            Color color = getSafeColor(fill);
+
+                            if (color != null) {
+                                g2d.setColor(color);
                                 g2d.fill(rect);
                             }
                         }
 
-                        // Dibujar el contorno.
-                        if (!rectStroke.equalsIgnoreCase("none")
-                                && strokeWidth > 0) {
-                            Color strokeColor = parseColor(rectStroke, 1.0f);
-                            if (strokeColor != null) {
-                                g2d.setColor(strokeColor);
-                                g2d.setStroke(
-                                        new BasicStroke(strokeWidth));
+                        if (!stroke.equals("none") && strokeWidth > 0) {
+                            Color color = getSafeColor(stroke);
+
+                            if (color != null) {
+                                g2d.setColor(color);
+                                g2d.setStroke(new BasicStroke(strokeWidth));
                                 g2d.draw(rect);
                             }
                         }
-                    } catch (NumberFormatException ex) {
-                        LOG.warning("Atributos numéricos inválidos en rect: "
-                                + ex.getMessage());
+                    }
+
+                    // Dibujar POLYLINE
+                    else if (type.equals("polyline")) {
+                        String points = shape.getProperty("points", "").trim();
+
+                        if (points.isEmpty()) {
+                            continue;
+                        }
+
+                        String[] coordinates = points.split("[\\s,]+");
+
+                        if (coordinates.length < 4 ||
+                                coordinates.length % 2 != 0) {
+                            continue;
+                        }
+
+                        java.awt.geom.Path2D.Double path =
+                                new java.awt.geom.Path2D.Double();
+
+                        for (int i = 0; i < coordinates.length; i += 2) {
+                            double px = Double.parseDouble(coordinates[i]);
+                            double py = Double.parseDouble(coordinates[i + 1]);
+
+                            if (i == 0) {
+                                path.moveTo(px, py);
+                            } else {
+                                path.lineTo(px, py);
+                            }
+                        }
+
+                        String fill = shape.getProperty("fill", "black");
+                        String stroke = shape.getProperty("stroke", "none");
+                        float strokeWidth = Float.parseFloat(
+                                shape.getProperty("stroke-width", "1")
+                        );
+
+                        if (!fill.equals("none")) {
+                            Color color = getSafeColor(fill);
+
+                            if (color != null) {
+                                g2d.setColor(color);
+                                g2d.fill(path);
+                            }
+                        }
+
+                        if (!stroke.equals("none") && strokeWidth > 0) {
+                            Color color = getSafeColor(stroke);
+
+                            if (color != null) {
+                                g2d.setColor(color);
+                                g2d.setStroke(new BasicStroke(strokeWidth));
+                                g2d.draw(path);
+                            }
+                        }
                     }
                 }
-
-
+            } catch (NumberFormatException e) {
+                LOG.warning("Una figura SVG contiene un valor numerico invalido: "
+                        + e.getMessage());
+            } finally {
+                g2d.dispose();
             }
-
         }
 
+    private Color getSafeColor(String colorString) {
+        if (colorString == null || colorString.trim().isEmpty()
+                || colorString.equalsIgnoreCase("none")) {
+            return null;
+        }
+
+        try {
+            String value = colorString.trim();
+
+            if (value.startsWith("#") || value.startsWith("0x")
+                    || value.startsWith("0X")) {
+                return Color.decode(value);
+            }
+
+            return parseColor(value, 1.0f);
+        } catch (RuntimeException e) {
+            LOG.warning("Color no reconocido: " + colorString);
+            return null;
+        }
     }
+
 
     // https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/named-color
     private void loadColors() {
