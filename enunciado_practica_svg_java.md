@@ -1,5 +1,5 @@
-Cesar Uriel Aguiar Altamirano
-Uriel Santos
+# Cesar Uriel Aguiar Altamirano.
+# Uriel Santos.
 Expedientes
 a225204109
 a225204882
